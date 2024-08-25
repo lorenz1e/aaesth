@@ -4,13 +4,19 @@ import { authSignOut } from '../firebase/auth';
 import { checkUsernameExists, getUIDbyUN, getUserDoc } from '../firebase/firestore';
 import { Spinner } from 'react-activity';
 import { FIREBASE_AUTH } from '../firebase/firebase';
+import { useAuth } from '../contexts/AuthContext';
+import { SplashScreen } from '../components/SplashScreen';
+import { ImageUpload } from '../components/ImageUpload';
+import { PostsList } from '../components/PostsList';
 
 export const Profile = () => {
     const { id } = useParams();
+    const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [profile, setProfile] = useState(null);
-    const [ownProfile, setOwnProfile] = useState(false)
+    const [ownProfile, setOwnProfile] = useState(false);
+    const [posts, setPosts] = useState()
 
     useEffect(() => {
         const checkProfile = async () => {
@@ -22,28 +28,30 @@ export const Profile = () => {
                     const uid = await getUIDbyUN(id);
                     const user = await getUserDoc(uid.uid);
                     setProfile(user);
-                    console.log(user)
+                    console.log(profile)
+
                     setLoading(false);
+
+                    if (currentUser?.uid === uid.uid) {
+                        setOwnProfile(true);
+                    } else {
+                        setOwnProfile(false);
+                    }
+
+
                 }
             } catch (err) {
-                console.log(err);
-                navigate('/error');
+                console.log(err)
             }
         };
 
         checkProfile();
-    }, [id, navigate]);
+    }, [id, navigate, currentUser]);
 
-    useEffect(() => {
-        if (profile == FIREBASE_AUTH.user) {
-            setOwnProfile(true)
-        } else setOwnProfile(false)
-
-        console.log(ownProfile)
-    }, [profile])
+   
 
     if (loading) {
-        return <Spinner />;
+        return <SplashScreen></SplashScreen>
     }
 
     if (!profile) {
@@ -54,7 +62,9 @@ export const Profile = () => {
         <div className='flex flex-col items-center'>
             <div>@{profile.username}</div>
 
+            {ownProfile ? <AuthProfile></AuthProfile> : null}
 
+            <PostsList uid={profile.uid}></PostsList>
         </div>
     );
 };
@@ -62,10 +72,8 @@ export const Profile = () => {
 const AuthProfile = () => {
     return (
         <>
-            <input type='file'></input>
+        <ImageUpload></ImageUpload>
             <button className="bg-red-500 text-white px-10 py-2 mt-6 rounded-xl flex justify-center" onClick={authSignOut}>Sign Out</button>
         </>
-
-
     )
-}
+};

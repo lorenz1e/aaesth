@@ -31,7 +31,11 @@ export const signIn = async (email, password) => {
 }
 
 export const authSignOut = async () => {
-    signOut(FIREBASE_AUTH)
+    try {
+        signOut(FIREBASE_AUTH)
+    } catch (error) {
+        console.log(error)
+    } 
 }
 
 
