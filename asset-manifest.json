@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/aaesth/static/css/main.1e618a87.css",
+    "main.js": "/aaesth/static/js/main.d18d9aaf.js",
+    "index.html": "/aaesth/index.html",
+    "main.1e618a87.css.map": "/aaesth/static/css/main.1e618a87.css.map",
+    "main.d18d9aaf.js.map": "/aaesth/static/js/main.d18d9aaf.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1e618a87.css",
+    "static/js/main.d18d9aaf.js"
+  ]
+}
