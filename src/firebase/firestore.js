@@ -1,115 +1,109 @@
 import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { FIREBASE_AUTH, FIREBASE_DB } from "./firebase";
-import { updateCurrentUser, updateProfile } from "firebase/auth";
+import { updateProfile } from "firebase/auth";
 import { ref } from "firebase/storage";
 import { FIREBASE_STORAGE } from "./firebase";
 import { v4 as uuidv4 } from "uuid";
 import { uploadBytes } from "firebase/storage";
 
 
-
 export const checkUsernameExists = async (username) => {
     const docRef = doc(FIREBASE_DB, `links/${username}`);
     try {
         const docSnap = await getDoc(docRef);
-        const exists = docSnap.exists();
-
-        return exists;
+        return docSnap.exists();
     } catch (error) {
         throw new Error("Error while checking username");
     }
 };
 
-
-export const createUserDocs = async (username, email, password, uid) => {
+export const createUserDocs = async (username, realName, email, password, uid) => {
     try {
         const usernameExists = await checkUsernameExists(username);
         if (usernameExists) {
             throw new Error("Username already exists");
         }
 
-        const docRef1 = doc(FIREBASE_DB, `users/${uid}`);
-        const docRef2 = doc(FIREBASE_DB, `links/${username}`);
+        const publicDocRef = doc(FIREBASE_DB, `users_public/${uid}`);
+        const privateDocRef = doc(FIREBASE_DB, `users_private/${uid}`);
+        const linkDocRef = doc(FIREBASE_DB, `links/${username}`);
 
-        const data1 = {
+        const publicData = {
             uid: uid,
             username: username,
+            realName: realName,
+            pfp_url: "", 
+        };
+
+        const privateData = {
+            uid: uid,
             email: email,
             password: password,
             created_at: Date(),
             last_login: Date(),
-            pfp_url: "",
-
         };
 
-        const data2 = {
+        const linkData = {
             uid: uid,
             username: username
         };
 
-        await setDoc(docRef1, data1);
-        await setDoc(docRef2, data2);
+        await setDoc(publicDocRef, publicData);
+        await setDoc(linkDocRef, linkData);
+        await setDoc(privateDocRef, privateData);
 
         await updateProfile(FIREBASE_AUTH.currentUser, {
             displayName: username
-        })
+        });
 
     } catch (error) {
-        throw new Error(error)
+        FIREBASE_AUTH.currentUser.delete()
+       
+        throw new Error(error);
     }
 };
 
-export const getUserDoc = async (uid) => {
-    const docRef = doc(FIREBASE_DB, `users/${uid}`);
 
+export const getUserPublicDoc = async (uid) => {
+    const docRef = doc(FIREBASE_DB, `users_public/${uid}`);
     try {
-        const docSnap = await getDoc(docRef)
-
-        if (docSnap.exists()) {
-            return docSnap.data();
-        } else {
-            return null;
-        }
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? docSnap.data() : null;
     } catch (error) {
-        console.log(error)
+        console.error("Error fetching user doc: ", error);
+        return null;
     }
-}
+};
+
+export const getUserPrivateDoc = async (uid) => {
+    const docRef = doc(FIREBASE_DB, `users_private/${uid}`);
+    try {
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? docSnap.data() : null;
+    } catch (error) {
+        console.error("Error fetching user doc: ", error);
+        return null;
+    }
+};
+
 
 export const getUIDbyUN = async (username) => {
     const docRef = doc(FIREBASE_DB, `links/${username}`);
-
     try {
-        const docSnap = await getDoc(docRef)
-
-        if (docSnap.exists()) {
-            return docSnap.data();
-        } else {
-            return null;
-        }
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? docSnap.data() : null;
     } catch (error) {
-        console.log(error)
+        console.error("Error fetching UID by username: ", error);
+        return null;
     }
-}
+};
 
 export const createPost = async (image) => {
-    if (image == null) return;
-    const imageRef = ref(FIREBASE_STORAGE, `posts/${FIREBASE_AUTH.currentUser.uid}/${uuidv4()}`)
-    const colRef = collection(FIREBASE_DB, `users/${FIREBASE_AUTH.currentUser.uid}/posts`);
-
-
+    if (!image) return;
+    const imageRef = ref(FIREBASE_STORAGE, `posts/${FIREBASE_AUTH.currentUser.uid}/${uuidv4()}`);
     try {
-        const imageSnap = await uploadBytes(imageRef, image)
-
-        const data = {
-            created_at: Date(),
-            file_name: imageSnap.metadata.name,
-            full_path: imageSnap.metadata.fullPath
-        }
-
-        await addDoc(colRef, data)
-
-        console.log("upload done")
+        await uploadBytes(imageRef, image);
     } catch (error) {
-        console.log(error)
+        console.error("Error uploading image: ", error);
     }
-}
+};

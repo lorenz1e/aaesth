@@ -11,38 +11,44 @@ export const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
+    const [realName, setRealName] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [disabled, setDisabled] = useState(false)
 
     if (FIREBASE_AUTH.currentUser) {
         return <Navigate to={`/${FIREBASE_AUTH.currentUser.displayName}`}/>
     }
 
     const handleNext = async () => {
+        setDisabled(true)
         setLoading(true);
         try {
             if (await checkUsernameExists(username) === false && username.length >= 3) {
                 setCurPage(2)
                 setLoading(false)
                 setError(null)
+                setDisabled(false)
             } else {
                 setError("Username is not available")
                 setLoading(false)
+                setDisabled(false)
             }
         } catch (err) {
             setError("Username is not available");
             setLoading(false)
+            setDisabled(false)
         }
     };
 
     const handleSignUp = async () => {
         setLoading(true)
         try {
-            await signUpWithEmail(email, password, username);
+            await signUpWithEmail(email, password, username, realName);
             setLoading(false);
             setError(null)
         } catch (err) {
-            setError(err.message);
+            setError(err);
             setLoading(false)
         }
     };
@@ -61,7 +67,10 @@ export const SignUp = () => {
                                 handleNext={handleNext}
                                 username={username}
                                 setUsername={setUsername}
+                                realName={realName}
+                                setRealName={setRealName}
                                 loading={loading}
+                                disabled={disabled}
                             />
                         ) : (
                             <SignUpEmail
@@ -85,16 +94,22 @@ export const SignUp = () => {
     )
 }
 
-const SignUpUsername = ({ handleNext, username, setUsername, loading }) => {
+const SignUpUsername = ({ handleNext, username, setUsername, realName, setRealName, loading, disabled }) => {
     return (
         <div className='flex flex-col my-4'>
+            <input
+                className="bg-gray-200 px-5 py-2 mb-4 outline-none rounded-xl"
+                value={realName}
+                placeholder='Real Name'
+                onChange={(input) => setRealName(input.target.value)}
+            />
             <input
                 className="bg-gray-200 px-5 py-2 mb-4 outline-none rounded-xl"
                 value={username}
                 placeholder='Username'
                 onChange={(input) => setUsername(input.target.value)}
             />
-            <button className="bg-black text-white px-5 py-2 rounded-xl disabled:bg-gray-500" onClick={handleNext}>
+            <button className="bg-black text-white px-5 py-2 rounded-xl disabled:bg-gray-500" onClick={handleNext} disabled={disabled}>
                 {loading ? <Spinner/> : "Next"}
             </button>
         </div>

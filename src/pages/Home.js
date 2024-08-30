@@ -1,50 +1,56 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { Spinner } from 'react-activity';
-import "react-activity/dist/library.css";
+import 'react-activity/dist/library.css';
 import { FaGoogle } from 'react-icons/fa';
-import { useState } from 'react';
-import { FaApple } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { FIREBASE_AUTH } from '../firebase/firebase';
+import { createUserDocs } from '../firebase/firestore';
 
+const time = new Date().getHours();
 
-export const Home = ({ }) => {
-    const [googleLoading, setGoogleLoading] = useState(false);
+export const Home = () => {
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [greeting, setGreeting] = useState("");
 
-    const navigate = useNavigate()
+  const navigate = useNavigate();
 
-    return (
-        <div className="flex flex-col h-[100vh] justify-center items-center">
-            <div className="text-2xl font-bold">Sign up and get started!</div>
-            <div className="flex text-lg">
-                <div className="mr-1.5">with</div>
-                <div className="italic font-medium">aaesth</div>
-            </div>
+  useEffect(() => {
+    if (time < 12) setGreeting("Morning");
+    else if (time >= 12 && time <= 17) setGreeting("Afternoon");
+    else if (time >= 17 && time <= 24) setGreeting("Evening");
+  }, []);
 
-            <div className='flex flex-col w-72 mt-10'>
-                <button className="bg-black text-white px-5 py-3 mb-2 rounded-xl" onClick={() => navigate("/sign-up")}>
-                    Sign Up
-                </button>
-                <button onClick={null} className='bg-gray-200 px-5 py-3 mb-2 rounded-xl flex items-center justify-center'>
-                    {!googleLoading && <FaGoogle className='mr-2 text-xl' />}
-                    {
-                        googleLoading ? <Spinner color='black' /> : "Sign up with Google"
-                    }
-                </button>
+  return (
+    <div className="flex flex-col h-screen justify-center items-center  px-4">
+      <div className="text-2xl font-bold text-center">
+        Good {greeting}! 👋
+      </div>
+      <div className="text-center mb-16">
+        Sign up or login to get started.
+      </div>
 
-                <button onClick={null} className='bg-gray-200 px-5 py-3 mb-2 rounded-xl flex items-center justify-center'>
-                    {!googleLoading && <FaApple className='mr-2 text-xl' />}
-                    {
-                        googleLoading ? <Spinner color='black' /> : "Sign up with Apple"
-                    }
-                </button>
+      <button
+        className="bg-black text-white font-bold rounded-2xl max-w-xs w-full h-[3.125rem] mb-4"
+        onClick={() => navigate("/sign-up")}
+      >
+        Sign up
+      </button>
 
-                <button onClick={() => navigate("/login")}>
-                    Login
-                </button>
-            </div>
+      <button
+        onClick={null} 
+        className="bg-gray-100 font-bold rounded-2xl max-w-xs w-full h-[3.125rem] flex justify-center items-center"
+      >
+        {!googleLoading && <FaGoogle className="mr-2 text-xl" />}
+        {googleLoading ? <Spinner color="black" /> : 'Sign up with Google'}
+      </button>
 
-        </div>
-    )
-}
+      <div className="w-full max-w-xs border-t border-gray-300 my-12"></div>
 
+      <button
+        onClick={() => navigate('/login')}
+        className="text-black font-bold bg-gray-100 rounded-2xl max-w-xs w-full h-[3.125rem]"
+      >
+        Login
+      </button>
+    </div>
+  );
+};

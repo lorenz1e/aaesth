@@ -1,9 +1,9 @@
 import { getDownloadURL, listAll } from 'firebase/storage';
 import React, { useEffect, useState } from 'react';
 import { ref } from 'firebase/storage';
-import { FIREBASE_AUTH, FIREBASE_STORAGE } from '../firebase/firebase';
+import { FIREBASE_STORAGE } from '../firebase/firebase';
 
-export const PostsList = ({uid}) => {
+export const PostsList = ({ uid }) => {
     const [imageList, setImageList] = useState([]);
 
     const imageListRef = ref(FIREBASE_STORAGE, `posts/${uid}`);
@@ -22,13 +22,15 @@ export const PostsList = ({uid}) => {
         };
 
         fetchImages();
-    }, [imageListRef]);
+    }, [uid]);
 
 
     return (
-        <div>
+        <div className='grid grid-cols-2'>
             {imageList.map((url, index) => (
-                <img key={index} src={url} alt={`post-${index}`} />
+                <div className='pl-2 pr-2 pt-4 pb-2' key={index}>
+                    <img src={url} className='rounded-lg max-h-[70vh]' alt={index}/>
+                </div>
             ))}
         </div>
     );

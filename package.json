@@ -1,6 +1,7 @@
 {
   "name": "aaesth",
   "version": "0.1.0",
+  "homepage": "https://lorenz1e.github.io/aaesth-build/",
   "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.45.2",

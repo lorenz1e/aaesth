@@ -1,79 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { authSignOut } from '../firebase/auth';
-import { checkUsernameExists, getUIDbyUN, getUserDoc } from '../firebase/firestore';
-import { Spinner } from 'react-activity';
-import { FIREBASE_AUTH } from '../firebase/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { SplashScreen } from '../components/SplashScreen';
-import { ImageUpload } from '../components/ImageUpload';
 import { PostsList } from '../components/PostsList';
+import { BiPlus } from 'react-icons/bi';
+import { authSignOut } from '../firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
-export const Profile = () => {
-    const { id } = useParams();
+export const Profile = ({ profile }) => {
     const { currentUser } = useAuth();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [profile, setProfile] = useState(null);
     const [ownProfile, setOwnProfile] = useState(false);
-    const [posts, setPosts] = useState()
 
     useEffect(() => {
-        const checkProfile = async () => {
-            try {
-                const exists = await checkUsernameExists(id);
-                if (!exists) {
-                    navigate('/not-found');
-                } else {
-                    const uid = await getUIDbyUN(id);
-                    const user = await getUserDoc(uid.uid);
-                    setProfile(user);
-                    console.log(profile)
-
-                    setLoading(false);
-
-                    if (currentUser?.uid === uid.uid) {
-                        setOwnProfile(true);
-                    } else {
-                        setOwnProfile(false);
-                    }
-
-
-                }
-            } catch (err) {
-                console.log(err)
-            }
-        };
-
-        checkProfile();
-    }, [id, navigate, currentUser]);
-
-   
-
-    if (loading) {
-        return <SplashScreen></SplashScreen>
-    }
-
-    if (!profile) {
-        return <div>Error: Profile not found</div>;
-    }
+        if (currentUser?.uid === profile?.uid) {
+            setOwnProfile(true);
+        } else {
+            setOwnProfile(false);
+        }
+    }, [currentUser, profile]);
 
     return (
-        <div className='flex flex-col items-center'>
-            <div>@{profile.username}</div>
+        <div className="flex flex-col h-screen mt-14 items-center px-4">
 
-            {ownProfile ? <AuthProfile></AuthProfile> : null}
+            <div className='rounded-full bg-gray-200 min-h-24 min-w-24 mb-6'></div>
+            <div className='text-2xl font-bold tracking-tight'>{profile.realName}</div>
+            <div className='font-medium text-base text-gray-500 '>@{profile.username}</div>
 
-            <PostsList uid={profile.uid}></PostsList>
+            {ownProfile ? <AuthProfile username={profile.username}/> : <Space/>}
+
+
+            <PostsList uid={profile.uid} />
+
         </div>
     );
 };
 
-const AuthProfile = () => {
+const AuthProfile = ({username}) => {
+    const navigate = useNavigate();
+
     return (
         <>
-        <ImageUpload></ImageUpload>
-            <button className="bg-red-500 text-white px-10 py-2 mt-6 rounded-xl flex justify-center" onClick={authSignOut}>Sign Out</button>
+            <button
+                className="text-black font-bold bg-gray-100 rounded-2xl max-w-56 w-full min-h-[3.125rem] flex justify-center items-center mt-6"
+                onClick={() => navigate("/edit-profile", {username: username})}
+            >
+                Edit profile
+            </button>
+
+            <button
+                className="text-white font-bold bg-black rounded-2xl max-w-56 w-full min-h-[3.125rem] flex justify-center items-center mb-6 mt-2"
+                onClick={() => navigate("/create")}
+            >
+                <BiPlus size={24} className='mr-2' />
+                Create Post
+            </button>
         </>
-    )
+    );
 };
+
+const Space = () => {
+    return (
+        <div className='mb-6'></div>
+    );
+}

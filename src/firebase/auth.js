@@ -3,10 +3,11 @@ import { FIREBASE_AUTH, } from "./firebase"
 import { GoogleAuthProvider } from "firebase/auth"
 import { createUserDocs } from "./firestore"
 
-export const signUpWithEmail = async (email, password, username) => {
+export const signUpWithEmail = async (email, password, username, realName) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password)
-        await createUserDocs(username, userCredential.user.email, password, userCredential.user.uid)
+        console.log(userCredential.user.email)
+        await createUserDocs(username, realName, userCredential.user.email, password, userCredential.user.uid)
     } catch (error) {
         throw new Error(error)
     }

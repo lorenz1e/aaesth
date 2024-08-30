@@ -4,7 +4,7 @@ import { Spinner } from 'react-activity';
 
 export const SplashScreen = () => {
     return createPortal(
-        <div className="fixed inset-0 bg-white flex justify-center items-center z-50"/>,
+        <div className="fixed inset-0 bg-white flex justify-center items-center z-50"></div>,
         document.body
     );
 };
