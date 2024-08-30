@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/www.aaesth.com/static/css/main.1e618a87.css",
-    "main.js": "/www.aaesth.com/static/js/main.79d344bb.js",
-    "index.html": "/www.aaesth.com/index.html",
-    "main.1e618a87.css.map": "/www.aaesth.com/static/css/main.1e618a87.css.map",
-    "main.79d344bb.js.map": "/www.aaesth.com/static/js/main.79d344bb.js.map"
+    "main.css": "/aaesth.com/static/css/main.1e618a87.css",
+    "main.js": "/aaesth.com/static/js/main.73fcc306.js",
+    "index.html": "/aaesth.com/index.html",
+    "main.1e618a87.css.map": "/aaesth.com/static/css/main.1e618a87.css.map",
+    "main.73fcc306.js.map": "/aaesth.com/static/js/main.73fcc306.js.map"
   },
   "entrypoints": [
     "static/css/main.1e618a87.css",
-    "static/js/main.79d344bb.js"
+    "static/js/main.73fcc306.js"
   ]
 }
