@@ -39,6 +39,7 @@ export const createUserDocs = async (username, realName, email, password, uid) =
             uid: uid,
             email: email,
             password: password,
+            password_length: password.length,
             created_at: Date(),
             last_login: Date(),
         };

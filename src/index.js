@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, HashRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -12,7 +12,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={`/${process.env.PUBLIC_URL}`}>
         <App />
       </BrowserRouter>
     </AuthProvider>

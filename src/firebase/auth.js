@@ -6,7 +6,6 @@ import { createUserDocs } from "./firestore"
 export const signUpWithEmail = async (email, password, username, realName) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password)
-        console.log(userCredential.user.email)
         await createUserDocs(username, realName, userCredential.user.email, password, userCredential.user.uid)
     } catch (error) {
         throw new Error(error)

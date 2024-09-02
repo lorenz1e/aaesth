@@ -14,10 +14,8 @@ import { AuthRedirect } from "./components/Redirects";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={
-       
-          <Home />
-        
+      <Route path="" element={
+        <Home />
       } />
 
       <Route path="/sign-up" element={
