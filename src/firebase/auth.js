@@ -1,7 +1,9 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth"
 import { FIREBASE_AUTH, } from "./firebase"
 import { GoogleAuthProvider } from "firebase/auth"
 import { createUserDocs } from "./firestore"
+import { GoogleAuthProvider } from "firebase/auth";
+
 
 export const signUpWithEmail = async (email, password, username, realName) => {
     try {
@@ -16,7 +18,7 @@ export const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
 
     try {
-        return await signInWithPopup(FIREBASE_AUTH, provider)
+        return await signInWithRedirect(FIREBASE_AUTH, provider)
     } catch (error) {
         console.log(error)
     }

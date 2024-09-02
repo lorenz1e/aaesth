@@ -1,10 +1,11 @@
-import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { FIREBASE_AUTH, FIREBASE_DB } from "./firebase";
 import { updateProfile } from "firebase/auth";
 import { ref } from "firebase/storage";
 import { FIREBASE_STORAGE } from "./firebase";
 import { v4 as uuidv4 } from "uuid";
 import { uploadBytes } from "firebase/storage";
+import { GoogleAuthProvider } from "firebase/auth";
 
 
 export const checkUsernameExists = async (username) => {
@@ -32,7 +33,7 @@ export const createUserDocs = async (username, realName, email, password, uid) =
             uid: uid,
             username: username,
             realName: realName,
-            pfp_url: "", 
+            pfp_url: "",
         };
 
         const privateData = {
@@ -59,7 +60,7 @@ export const createUserDocs = async (username, realName, email, password, uid) =
 
     } catch (error) {
         FIREBASE_AUTH.currentUser.delete()
-       
+
         throw new Error(error);
     }
 };
@@ -108,3 +109,16 @@ export const createPost = async (image) => {
         console.error("Error uploading image: ", error);
     }
 };
+
+export const uploadPFP = async (image) => {
+    if (!image) return;
+
+    const imageRef = ref(FIREBASE_STORAGE, `profile_pictures/${FIREBASE_AUTH.currentUser.uid}`);
+    const publicDocRef = doc(FIREBASE_DB, `users_public/${FIREBASE_AUTH.currentUser.uid}`);
+
+    try {
+        await uploadBytes(imageRef, image);
+    } catch (error) {
+        throw new Error(error)
+    }
+}
