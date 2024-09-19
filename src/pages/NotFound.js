@@ -11,7 +11,6 @@ export const NotFound = () => {
         Not Found
       </div>
 
-
       <button
         className="text-white font-bold bg-black rounded-2xl max-w-56 w-full min-h-[3.125rem] flex justify-center items-center mb-6 mt-2"
         onClick={() => navigate("/")}

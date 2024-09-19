@@ -1,20 +1,30 @@
 import React, { useState } from 'react';
 import { MdImageSearch } from "react-icons/md";
 import { createPost } from '../firebase/firestore';
-import { createPortal } from 'react-dom';
-import { Spinner } from 'react-activity';
 import { useNavigate } from 'react-router-dom';
 import { FIREBASE_AUTH } from '../firebase/firebase';
+import { cropImage } from '../CropImg';
+import imageCompression from 'browser-image-compression';
+import { SplashScreen } from '../components/SplashScreen';
+import { MdOutlineAddLocationAlt } from "react-icons/md";
+
 
 export const CreatePost = () => {
   const [upload, setUpload] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const [description, setDescription] = useState();
+  const [location, setLocation] = useState();
+
   const handlePublish = async () => {
     setLoading(true);
+    const options = { maxSizeMB: 4, useWebWorker: true };
+
     try {
-      await createPost(upload);
+      const croppedImage = await cropImage(upload);
+      const compressedImage = await imageCompression(croppedImage, options);
+      await createPost(croppedImage);
       setLoading(false);
       navigate(`/${FIREBASE_AUTH.currentUser.displayName}`);
     } catch (error) {
@@ -23,44 +33,37 @@ export const CreatePost = () => {
     }
   };
 
-  if (loading) {
-    return createPortal(
-      <div className="fixed inset-0 bg-white flex justify-center items-center z-50">
-        <Spinner size={20} />
-      </div>,
-      document.body
-    );
-  }
+  if (loading) return <SplashScreen />;
 
   return (
     <div className="flex flex-col h-screen justify-center items-center px-4 w-full">
-      <div className="w-full max-w-xs"> 
-       
-
-        <div className='bg-gray-200 w-full rounded-xl relative flex items-center justify-center overflow-hidden'
-             style={{ paddingTop: '150%' }}> 
-          <div className='absolute top-0 left-0 w-full h-full flex items-center justify-center'>
+      <div className="w-full max-w-xs">
+        <div className="relative pt-[150%] bg-gray-100 rounded-xl flex items-center justify-center overflow-visible ">
+          <div className="absolute inset-0 flex items-center justify-center">
             {upload ? (
-              <img src={URL.createObjectURL(upload)} className="w-full h-full object-cover rounded-xl" />
+              <img src={URL.createObjectURL(upload)} className="object-cover w-full h-full rounded-xl" alt="Upload" />
             ) : (
-              <div className='flex items-center flex-col justify-center font-bold'>
-                <MdImageSearch className='pb-2 text-4xl' />
+              <div className="flex flex-col items-center justify-center font-bold">
+                <MdImageSearch className="text-4xl pb-2" />
                 Upload an Image
 
-                
-                <input
-                  accept="image/*"
-                  type='file'
-                  className='absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer'
-                  onChange={(e) => setUpload(e.target.files[0])}
-                />
               </div>
             )}
+            <input
+              accept="image/png, image/jpeg"
+              type="file"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={(e) => setUpload(e.target.files[0])}
+            />
+
           </div>
         </div>
 
+       
+
+
         <button
-          className="text-white font-bold bg-black rounded-2xl w-full min-h-[3.125rem] flex justify-center items-center mb-4 mt-14"
+          className="bg-black text-white font-bold rounded-2xl w-full h-12 flex justify-center items-center mt-14"
           onClick={handlePublish}
         >
           Create Post

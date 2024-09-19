@@ -12,8 +12,10 @@ export const NoAuthProtection = ({  children }) => {
 }
 
 export const AuthRedirect = ({children}) => {
+    const {currentUser} = useAuth()
+
     if (FIREBASE_AUTH.currentUser) {
-        return <Navigate to={`/${FIREBASE_AUTH.currentUser.displayName}`}></Navigate>
+        return <Navigate to={`/${currentUser.db.public.username}`}></Navigate>
     }
 
     return children

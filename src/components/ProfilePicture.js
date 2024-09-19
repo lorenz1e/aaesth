@@ -1,46 +1,35 @@
-import { getDownloadURL } from 'firebase/storage';
-import React, { useEffect, useState, useTransition } from 'react';
-import { ref } from 'firebase/storage';
-import { FIREBASE_STORAGE } from '../firebase/firebase';
+import React, { useEffect, useState } from 'react';
 import { uploadPFP } from '../firebase/firestore';
+import imageCompression from 'browser-image-compression';
+import { useAuth } from '../contexts/AuthContext';
 
-export const ProfilePicture = ({ uid, ownProfile }) => {
+export const ProfilePicture = ({ ownProfile, url }) => {
     const [image, setImage] = useState(null);
-    const [upload, setUpload] = useState(null)
-    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        const fetchImage = async () => {
-            const imageRef = ref(FIREBASE_STORAGE, `profile_pictures/${uid}`);
+        setImage(url)
+    }, [url]);
 
-            // console.log(imageRef)
-            
-            try {
-                const url = await getDownloadURL(imageRef);
-                setImage(url);
-            } catch (error) {
-                console.error("Error fetching profile picture: ", error);
-                setImage(null)
-            }
-        };
-
-        fetchImage();
-    }, []);
-
-    useEffect(() => {
-        const uploadImage = async () => {
-            try {
-                await uploadPFP(upload)
-            } catch (error) {
-                console.log(error)
-            }
+    const uploadImage = async (imageFile) => {
+        const options = {
+            maxSizeMB: 0.5,
+            maxWidthOrHeight: 512,
+            useWebWorker: true,
         }
 
-        uploadImage();
-    }, [upload])
+        try {
+            const compressedFile = await imageCompression(imageFile, options);
+
+            await uploadPFP(compressedFile)
+
+            window.location.reload()
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
-        <div className='relative rounded-full bg-gray-200 min-h-24 min-w-24 mb-6 overflow-hidden'>
+        <div className='relative rounded-full bg-gray-200 min-h-24 min-w-24 h-24 w-24 mb-6 overflow-hidden'>
             {
                 image ? (
                     <img
@@ -61,7 +50,7 @@ export const ProfilePicture = ({ uid, ownProfile }) => {
                         accept="image/*"
                         type='file'
                         className='absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer'
-                        onChange={(e) => setUpload(e.target.files[0])}
+                        onChange={(event) => uploadImage(event.target.files[0])}
                     />
                 )
             }

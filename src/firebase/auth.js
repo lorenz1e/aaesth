@@ -1,14 +1,15 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth"
-import { FIREBASE_AUTH, } from "./firebase"
+import { createUserWithEmailAndPassword, getAdditionalUserInfo, getRedirectResult, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth"
+import { FIREBASE_AUTH, FIREBASE_DB, } from "./firebase"
 import { GoogleAuthProvider } from "firebase/auth"
-import { createUserDocs } from "./firestore"
-import { GoogleAuthProvider } from "firebase/auth";
+import { createDefaultUserDocs, updateToCompleteUserDocs } from "./firestore"
+import { doc, setDoc } from "firebase/firestore"
+import { updateProfile } from "firebase/auth"
 
 
 export const signUpWithEmail = async (email, password, username, realName) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password)
-        await createUserDocs(username, realName, userCredential.user.email, password, userCredential.user.uid)
+        await updateToCompleteUserDocs(username, realName, userCredential.user.email, password, userCredential.user.uid)
     } catch (error) {
         throw new Error(error)
     }
@@ -18,11 +19,20 @@ export const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
 
     try {
-        return await signInWithRedirect(FIREBASE_AUTH, provider)
+        const credential = await signInWithPopup(FIREBASE_AUTH, provider)
+
+        const { isNewUser } = await getAdditionalUserInfo(credential)
+
+        if (isNewUser) {
+            await createDefaultUserDocs();
+        }
+
+
     } catch (error) {
-        console.log(error)
+        throw new Error(error)
     }
 }
+
 
 export const signIn = async (email, password) => {
     try {
@@ -37,7 +47,7 @@ export const authSignOut = async () => {
         signOut(FIREBASE_AUTH)
     } catch (error) {
         console.log(error)
-    } 
+    }
 }
 
 

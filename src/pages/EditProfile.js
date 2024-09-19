@@ -2,26 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { authSignOut } from '../firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { FIREBASE_AUTH } from '../firebase/firebase';
-import { getUserPrivateDoc } from '../firebase/firestore';
+import { getUserPrivateDoc, getUserPublicDoc } from '../firebase/firestore';
 import { MdLock } from "react-icons/md";
+import { Timestamp } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 
 export const EditProfile = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
+  const {currentUser} = useAuth(FIREBASE_AUTH)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userData = await getUserPrivateDoc(FIREBASE_AUTH.currentUser.uid);
-        setData(userData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const privateData = currentUser.db.private
+  const publicData = currentUser.db.public
 
   return (
     <div className="flex flex-col h-screen justify-center items-center px-4 w-full">
@@ -38,32 +30,34 @@ export const EditProfile = () => {
         </div>
 
         <div className="mb-4">
-          <div className="mb-0.5 text-gray-500">E-Mail</div>
+          <div className="mb-0.5 text-gray-500">Username</div>
           <input
             className="bg-gray-100 px-5 font-medium rounded-2xl w-full h-[3.125rem] outline-none"
             disabled
-            value={data?.email || ''}
+            value={publicData?.username || ''}
           />
         </div>
 
         <div className="mb-4">
-          <div className="mb-0.5 text-gray-500">Password</div>
+          <div className="mb-0.5 text-gray-500">E-Mail</div>
           <input
             className="bg-gray-100 px-5 font-medium rounded-2xl w-full h-[3.125rem] outline-none"
             disabled
-            value={data?.password || ''}
+            value={privateData?.email || ''}
           />
         </div>
+
 
         <div className="mb-14">
           <div className="mb-0.5 text-gray-500">Profile ID</div>
           <input
             className="bg-gray-100 px-5 font-medium rounded-2xl w-full h-[3.125rem] outline-none"
             disabled
-            value={data?.uid || ''}
+            value={privateData?.uid || ''}
           />
         </div>
 
+        
         <button
           className="text-white font-bold bg-red-600 rounded-2xl w-full min-h-[3.125rem] flex justify-center items-center"
           onClick={() => {
